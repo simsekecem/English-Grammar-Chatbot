@@ -7,6 +7,26 @@ ozne(it, 3, tekil).
 ozne(we, 1, cogul).
 ozne(they, 3, cogul).
 
+
+% Hatalı özneleri düzeltmek için
+ozne_duzeltme(i, i).
+ozne_duzeltme(you, you).
+ozne_duzeltme(he, he).
+ozne_duzeltme(she, she).
+ozne_duzeltme(it, it).
+ozne_duzeltme(we, we).
+ozne_duzeltme(they, they).
+
+ozne_duzeltme(me, i).
+ozne_duzeltme(my, i).
+ozne_duzeltme(mine, i).
+ozne_duzeltme(her, she).
+ozne_duzeltme(him, he).
+ozne_duzeltme(us, we).
+ozne_duzeltme(them, they).
+ozne_duzeltme(our, we).
+ozne_duzeltme(their, they).
+
 % Geniş zaman (present) fiil çekimleri
 fiil_zaman(go, 3, tekil, goes).
 fiil_zaman(go, _, cogul, go).
@@ -35,14 +55,16 @@ cumle_dogrula(Ozne, FiilKokAtom, NesneStr, DogruCumle) :-
     fiil_zaman(FiilKok, Kisi, Sayi, CekimliFiil),
     atomic_list_concat([Ozne, CekimliFiil, NesneStr], ' ', DogruCumle).
 
-% Geri bildirimli kontrol
-cumle_dogrula_geri_bildirim(Ozne, FiilVerilen, NesneStr, FiilKokAtom, DogruCumle, GeriBildirim) :-
+cumle_dogrula_geri_bildirim(OzneVerilen, FiilVerilen, NesneStr, FiilKokAtom, DogruCumle, GeriBildirim) :-
     atom_string(FiilKok, FiilKokAtom),
-    ozne(Ozne, Kisi, Sayi),
+    ozne_duzeltme(OzneVerilen, OzneDuzeltildi),
+    ozne(OzneDuzeltildi, Kisi, Sayi),
     fiil_zaman(FiilKok, Kisi, Sayi, DogruFiil),
-    atomic_list_concat([Ozne, DogruFiil, NesneStr], ' ', DogruCumle),
-    (FiilVerilen \= DogruFiil ->
-        format(atom(GeriBildirim), 'Fiil "~w" hatalı, doğrusu "~w" olmalı.', [FiilVerilen, DogruFiil])
+    atomic_list_concat([OzneDuzeltildi, DogruFiil, NesneStr], ' ', DogruCumle),
+    ( (FiilVerilen \= DogruFiil ; OzneVerilen \= OzneDuzeltildi) ->
+        format(atom(GeriBildirim), '~n~w ~w yerine ~w ~w olmali.', 
+            [OzneVerilen, FiilVerilen, OzneDuzeltildi, DogruFiil])
     ; 
-        GeriBildirim = 'Cümle doğru görünüyor.'
+        GeriBildirim = 'Cümle dogru gorunuyor.'
     ).
+
