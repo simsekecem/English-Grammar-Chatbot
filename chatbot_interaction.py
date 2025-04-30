@@ -2,7 +2,7 @@ from pyswip import Prolog
 
 # Prolog dosyasını yükle
 prolog = Prolog()
-prolog.consult("grammar_correction.pl")  # Dosya adını kendi .pl dosyana göre ayarla
+prolog.consult("grammar_correction.pl")  # .pl dosya adın buysa değiştirmene gerek yok
 
 print("📘 Gramer Düzeltici Chatbot (Çıkmak için 'exit' yaz)\n")
 
@@ -23,13 +23,14 @@ while True:
     ozne, fiil, *nesne = kelimeler
     nesne_str = ' '.join(nesne)
 
-    # Prolog sorgusunu hazırla
-    query = f"cumle_dogrula({ozne}, {fiil}, '{nesne_str}', C)."
-
+    # Prolog geri bildirimli sorguyu hazırla
     try:
+        query = f"cumle_dogrula_geri_bildirim({ozne}, {fiil}, '{nesne_str}', {fiil}, C, G)."
         sonuc = list(prolog.query(query))
+
         if sonuc:
             print("✅ Doğru hali:", sonuc[0]["C"])
+            print("ℹ️  Geri Bildirim:", sonuc[0]["G"])
         else:
             print("❌ Bu cümle için kural bulunamadı.")
     except Exception as e:
