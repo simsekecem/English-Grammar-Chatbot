@@ -15,7 +15,7 @@ while True:
     # Kullanıcının cümlesini parçala
     kelimeler = cumle.split()
     
-    # Yeterli uzunlukta mı kontrol et
+    # Yeterli uzunlukta mı kontrol et kontrol deneme
     if len(kelimeler) < 3:
         print("⚠️ Lütfen en az bir özne, fiil ve nesne gir.")
         continue
