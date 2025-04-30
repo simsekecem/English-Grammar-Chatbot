@@ -37,7 +37,7 @@ cumle_dogrula_geri_bildirim(Ozne, FiilVerilen, NesneStr, FiilKokAtom, DogruCumle
     fiil_zaman(FiilKok, Kisi, Sayi, DogruFiil),
     atomic_list_concat([Ozne, DogruFiil, NesneStr], ' ', DogruCumle),
     (FiilVerilen \= DogruFiil ->
-        format(atom(GeriBildirim), 'Fiil "~w" hatalı, doğrusu "~w" olmalı.', [FiilVerilen, DogruFiil])
+        format(atom(GeriBildirim), 'Fiil "~w" hatali, dogrusu "~w" olmali.', [FiilVerilen, DogruFiil])
     ; 
-        GeriBildirim = 'Cümle doğru görünüyor.'
+        GeriBildirim = 'Cümle dogru gorunuyor.'
     ).
