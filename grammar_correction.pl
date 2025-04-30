@@ -7,8 +7,7 @@ ozne(it, 3, tekil).
 ozne(we, 1, cogul).
 ozne(they, 3, cogul).
 
-
-% Hatalı özneleri düzeltmek için
+% Hatalı özneleri düzeltme
 ozne_duzeltme(i, i).
 ozne_duzeltme(you, you).
 ozne_duzeltme(he, he).
@@ -16,7 +15,6 @@ ozne_duzeltme(she, she).
 ozne_duzeltme(it, it).
 ozne_duzeltme(we, we).
 ozne_duzeltme(they, they).
-
 ozne_duzeltme(me, i).
 ozne_duzeltme(my, i).
 ozne_duzeltme(mine, i).
@@ -27,7 +25,18 @@ ozne_duzeltme(them, they).
 ozne_duzeltme(our, we).
 ozne_duzeltme(their, they).
 
-% Geniş zaman (present) fiil çekimleri
+fiil_koku_bul(Fiil, Kok) :- 
+    atom_chars(Fiil, Chars),
+    (   append(KokList, ['e','s'], Chars), KokList \= [] -> true
+    ;   append(KokList, ['s'], Chars), KokList \= [] -> true
+    ;   append(KokList, ['e','s'], Chars), KokList \= [] -> true % es ekini kontrol et
+    ;   KokList = Chars
+    ),
+    atom_chars(Kok, KokList), !.
+
+
+
+% Geniş zaman fiil çekimleri
 fiil_zaman(go, 3, tekil, goes).
 fiil_zaman(go, _, cogul, go).
 fiil_zaman(go, 1, tekil, go).
@@ -48,23 +57,24 @@ fiil_zaman(like, _, cogul, like).
 fiil_zaman(like, 1, tekil, like).
 fiil_zaman(like, 2, tekil, like).
 
-% Geniş zaman cümle doğrulama
+
+% Doğru cümle oluşturma
 cumle_dogrula(Ozne, FiilKokAtom, NesneStr, DogruCumle) :-
     atom_string(FiilKok, FiilKokAtom),
     ozne(Ozne, Kisi, Sayi),
     fiil_zaman(FiilKok, Kisi, Sayi, CekimliFiil),
     atomic_list_concat([Ozne, CekimliFiil, NesneStr], ' ', DogruCumle).
 
-cumle_dogrula_geri_bildirim(OzneVerilen, FiilVerilen, NesneStr, FiilKokAtom, DogruCumle, GeriBildirim) :-
-    atom_string(FiilKok, FiilKokAtom),
+% Geri bildirimli doğrulama (fiil kökü ayıklama dahil)
+cumle_dogrula_geri_bildirim(OzneVerilen, FiilVerilen, NesneStr, DogruCumle, GeriBildirim) :-
     ozne_duzeltme(OzneVerilen, OzneDuzeltildi),
+    fiil_koku_bul(FiilVerilen, FiilKok),
     ozne(OzneDuzeltildi, Kisi, Sayi),
     fiil_zaman(FiilKok, Kisi, Sayi, DogruFiil),
     atomic_list_concat([OzneDuzeltildi, DogruFiil, NesneStr], ' ', DogruCumle),
     ( (FiilVerilen \= DogruFiil ; OzneVerilen \= OzneDuzeltildi) ->
-        format(atom(GeriBildirim), '~n~w ~w yerine ~w ~w olmali.', 
+        format(atom(GeriBildirim), '~n~w ~w yerine ~w ~w olmali.',
             [OzneVerilen, FiilVerilen, OzneDuzeltildi, DogruFiil])
-    ; 
+    ;
         GeriBildirim = 'Cümle dogru gorunuyor.'
     ).
-

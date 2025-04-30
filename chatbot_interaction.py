@@ -1,8 +1,7 @@
 from pyswip import Prolog
 
-# Prolog dosyasını yükle
 prolog = Prolog()
-prolog.consult("grammar_correction.pl")  # .pl dosya adın buysa değiştirmene gerek yok
+prolog.consult("grammar_correction.pl")
 
 print("📘 Gramer Düzeltici Chatbot (Çıkmak için 'exit' yaz)\n")
 
@@ -12,10 +11,7 @@ while True:
         print("👋 Görüşmek üzere!")
         break
 
-    # Kullanıcının cümlesini parçala
     kelimeler = cumle.split()
-    
-    # Yeterli uzunlukta mı kontrol et kontrol deneme
     if len(kelimeler) < 3:
         print("⚠️ Lütfen en az bir özne, fiil ve nesne gir.")
         continue
@@ -23,15 +19,23 @@ while True:
     ozne, fiil, *nesne = kelimeler
     nesne_str = ' '.join(nesne)
 
-    # Prolog geri bildirimli sorguyu hazırla
     try:
-        query = f"cumle_dogrula_geri_bildirim({ozne}, {fiil}, '{nesne_str}', {fiil}, C, G)."
+        query = f"cumle_dogrula_geri_bildirim({ozne}, {fiil}, '{nesne_str}', C, G)."
         sonuc = list(prolog.query(query))
 
         if sonuc:
-            print("✅ Doğru hali:", sonuc[0]["C"])
-            print("ℹ️  Geri Bildirim:", sonuc[0]["G"])
+            dogru_cumle = sonuc[0]["C"]
+            geri_bildirim = sonuc[0]["G"]
+            
+            if "dogru gorunuyor" in geri_bildirim.lower():
+                print("✅ Cümle doğru:", dogru_cumle)
+            else:
+                print("✅ Doğru hali:", dogru_cumle)
+                print("ℹ️  Geri Bildirim:", geri_bildirim)
         else:
             print("❌ Bu cümle için kural bulunamadı.")
+
     except Exception as e:
         print("⚠️ Hatalı giriş veya Prolog hatası:", e)
+
+
