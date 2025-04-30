@@ -23,6 +23,11 @@ fiil_zaman(eat, _, cogul, eat).
 fiil_zaman(eat, 1, tekil, eat).
 fiil_zaman(eat, 2, tekil, eat).
 
+fiil_zaman(like, 3, tekil, likes).
+fiil_zaman(like, _, cogul, like).
+fiil_zaman(like, 1, tekil, like).
+fiil_zaman(like, 2, tekil, like).
+
 % Geniş zaman cümle doğrulama
 cumle_dogrula(Ozne, FiilKokAtom, NesneStr, DogruCumle) :-
     atom_string(FiilKok, FiilKokAtom),
