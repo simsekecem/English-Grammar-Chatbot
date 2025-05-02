@@ -1,95 +1,62 @@
-import re
 from pyswip import Prolog
+import re
 
 prolog = Prolog()
 prolog.consult("grammar_correction.pl")
 
-ozne_duzeltme = {
-    'i': 'i', 'you': 'you', 'he': 'he', 'she': 'she', 'it': 'it',
-    'we': 'we', 'they': 'they', 'me': 'i', 'my': 'i', 'mine': 'i',
-    'her': 'she', 'him': 'he', 'us': 'we', 'them': 'they',
-    'our': 'we', 'their': 'they'
-}
+print("📘 Gramer Düzeltici Chatbot (Çıkmak için 'exit' yaz)\n")
 
-ozne_listesi = {'i', 'you', 'he', 'she', 'it', 'we', 'they'}
-
-# Basit fiil listesi (Prolog sisteminle uyumlu)
-fiil_listesi = {'go', 'like', 'eat', 'play', 'read', 'walk', 'study', 'write', 'watch'}
-
-def cumleye_ayir_baglamli(paragraf):
-    kelimeler = paragraf.strip().lower().split()
-    cümleler = []
-    cümle = []
-
-    i = 0
-    while i < len(kelimeler):
-        kelime = kelimeler[i]
-        duzeltilmis = ozne_duzeltme.get(kelime)
-
-        # Sonraki kelime var mı?
-        sonraki_kelime = kelimeler[i + 1] if i + 1 < len(kelimeler) else None
-
-        if (
-            duzeltilmis in ozne_listesi
-            and sonraki_kelime in fiil_listesi
-            and cümle
-        ):
-            cümleler.append(' '.join(cümle))
-            cümle = [kelime]
-        else:
-            cümle.append(kelime)
-
-        i += 1
-
-    if cümle:
-        cümleler.append(' '.join(cümle))
-
-    return cümleler
-
-
-
-
-
-print("📘 Gramer Düzeltici Chatbot (Paragraf için çalışır, çıkmak için 'exit' yaz)\n")
+# Yer ismi kontrolü
+def yer_dogrulama(nesne):
+    return bool(re.match(r'^[a-zA-Z\s]+$', nesne))  # Harf ve boşluktan oluşan kelimeler geçerli
 
 while True:
-    paragraf = input("👤 Paragraf girin: ").lower()
-    if paragraf.strip() in ['exit', 'quit', 'çık']:
+    cumle = input("👤 Sen: ").lower()
+    if cumle.strip() in ['exit', 'quit', 'çık']:
         print("👋 Görüşmek üzere!")
         break
 
-    cumleler = cumleye_ayir_baglamli(paragraf)
+    kelimeler = cumle.split()
+    if len(kelimeler) < 3:
+        print("⚠️ Lütfen en az bir özne, fiil ve nesne gir.")
+        continue
 
-    duzeltilmisler = []
-    geri_bildirimler = []
+    ozne, fiil, *nesne = kelimeler
 
-    for cumle in cumleler:
-        kelimeler = cumle.split()
-        if len(kelimeler) < 3:
-            duzeltilmisler.append(cumle)
-            geri_bildirimler.append("⚠️ Eksik yapı: " + cumle)
-            continue
+    # "go to" eksikliği için düzeltme
+    if fiil in ['go', 'goes', 'went'] and nesne:
+        if yer_dogrulama(nesne[0]):
+            if len(nesne) == 1 or nesne[0] != 'to':
+                nesne = ['to'] + nesne
 
-        ozne, fiil, *nesne = kelimeler
-        nesne_str = ' '.join(nesne)
+    nesne_str = ' '.join(nesne)
 
-        try:
-            query = f"cumle_dogrula_geri_bildirim({ozne}, {fiil}, '{nesne_str}', C, G)."
-            sonuc = list(prolog.query(query))
+    try:
+        if fiil in ['am', 'is', 'are']:
+            query = f"to_be_cumle_dogrula_geri_bildirim('{ozne}', '{fiil}', '{nesne_str}', C, G)."
+        else:
+            query = f"cumle_dogrula_geri_bildirim('{ozne}', '{fiil}', '{nesne_str}', C, G)."
 
-            if sonuc:
-                duzeltilmisler.append(sonuc[0]["C"])
-                geri_bildirimler.append(sonuc[0]["G"])
+        sonuc = list(prolog.query(query))
+
+        if sonuc:
+            dogru_cumle = sonuc[0]["C"]
+            geri_bildirim = sonuc[0]["G"]
+
+            if "dogru gorunuyor" in geri_bildirim.lower():
+                print("✅ Cümle doğru:", dogru_cumle)
             else:
-                duzeltilmisler.append(cumle)
-                geri_bildirimler.append("❌ Kural bulunamadı: " + cumle)
+                print("✅ Doğru hali:", dogru_cumle)
+                print("ℹ️  Geri Bildirim:", geri_bildirim)
+        else:
+            print("❌ Bu cümle için kural bulunamadı.")
 
-        except Exception as e:
-            duzeltilmisler.append(cumle)
-            geri_bildirimler.append("⚠️ Hata: " + str(e))
+    except Exception as e:
+        print("⚠️ Hatalı giriş veya Prolog hatası:", e)
 
-    print("\n✅ Düzeltilmiş Paragraf:\n" + '. '.join(duzeltilmisler) + '.')
-    print("\n🧾 Geri Bildirimler:")
-    for gb in geri_bildirimler:
-        print("-", gb)
-    print()
+
+
+
+
+
+
