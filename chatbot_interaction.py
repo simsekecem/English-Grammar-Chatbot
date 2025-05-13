@@ -6,7 +6,7 @@ prolog.consult("grammar_correction.pl")
 
 print("📘 Gramer Düzeltici Chatbot (Çıkmak için 'exit' yaz)\n")
 
-# Yer ismi kontrolü
+
 def yer_dogrulama(nesne):
     return bool(re.match(r'^[a-zA-Z\s]+$', nesne))  # Harf ve boşluktan oluşan kelimeler geçerli
 
@@ -23,7 +23,7 @@ while True:
 
     ozne, fiil, *nesne = kelimeler
 
-    # "go to" eksikliği için düzeltme
+    
     if fiil in ['go', 'goes', 'went'] and nesne:
         if yer_dogrulama(nesne[0]):
             if len(nesne) == 1 or nesne[0] != 'to':
